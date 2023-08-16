@@ -20,6 +20,9 @@ export class User {
   @Column()
   lastName: string;
 
+  @Column({ nullable: true })
+  patronymic: string;
+
   @Column()
   age: number;
 
