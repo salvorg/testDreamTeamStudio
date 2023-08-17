@@ -6,6 +6,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
+import * as bcrypt from 'bcrypt';
+import { SALT_WORK_FACTOR } from '../constants';
 
 @Injectable()
 export class UserService {
@@ -58,20 +60,19 @@ export class UserService {
     return await this.userRepository.save(existUser);
   }
 
-  async editUser(
-    id: number,
-    email: string,
-    firstName: string,
-    lastName: string,
-    patronymic: string,
-    password: string,
-    age: number,
-  ) {
+  async editUser(id: number, body: Partial<User>) {
     const existUser = await this.userRepository.findOne({ where: { id } });
 
     if (!existUser) {
       throw new BadRequestException('User not found!');
     }
+
+    if (body.password) {
+      const salt = await bcrypt.genSalt(SALT_WORK_FACTOR);
+      body.password = await bcrypt.hash(body.password, salt);
+    }
+
+    return await this.userRepository.update(id, body);
   }
 
   async logoutUser(id: number) {

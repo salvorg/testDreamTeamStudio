@@ -33,15 +33,7 @@ export class UserController {
   @Patch('edit')
   @UseGuards(TokenAuthGuard)
   async editUser(@CurrentUser() user: User, @Body() body: Partial<User>) {
-    return this.userService.editUser(
-      user.id,
-      body.email,
-      body.firstName,
-      body.lastName,
-      body.patronymic,
-      body.password,
-      body.age,
-    );
+    return this.userService.editUser(user.id, body);
   }
 
   @Post('login')
