@@ -7,6 +7,8 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   Patch,
+  Get,
+  Param,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
@@ -18,8 +20,13 @@ import { User } from './user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get(':id')
+  async getUser(@Param('id') id: number): Promise<User> {
+    return this.userService.getUserBy(id);
+  }
+
   @Post('register')
-  registerUser(@Body() body: CreateUserDto) {
+  registerUser(@Body() body: CreateUserDto): Promise<User> {
     return this.userService.registerUser(
       body.email,
       body.firstName,
@@ -46,5 +53,11 @@ export class UserController {
   @UseGuards(TokenAuthGuard)
   async logoutUser(@CurrentUser() user: User) {
     return this.userService.logoutUser(user.id);
+  }
+
+  @Delete(':id')
+  @UseGuards(TokenAuthGuard)
+  async deleteUser(@Param('id') id: number): Promise<void> {
+    await this.userService.deleteUser(id);
   }
 }

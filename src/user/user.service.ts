@@ -24,11 +24,7 @@ export class UserService {
     password: string,
     age: number,
   ): Promise<User> {
-    const existUser = await this.userRepository.findOne({ where: { email } });
-
-    if (existUser) {
-      throw new BadRequestException('This email is already registered!');
-    }
+    await this.getUserBy({ email });
 
     const user = await this.userRepository.create({
       email,
@@ -76,17 +72,30 @@ export class UserService {
   }
 
   async logoutUser(id: number) {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.getUserBy({ id });
     await user.generateToken();
     await this.userRepository.save(user);
     return { message: 'Logout success' };
   }
 
-  private async getUserByEmail(email: string) {
-    const user = await this.userRepository.findOne({ where: { email } });
+  async deleteUser(id: number) {
+    await this.getUserBy({ id });
+    await this.userRepository.delete(id);
+    return { message: 'Deleted successfully' };
+  }
+
+  async getUserBy(props) {
+    const user = await this.userRepository.findOne({ where: props });
+
+    if (props.email) {
+      if (user) {
+        throw new BadRequestException('This email is already registered!');
+      }
+      return;
+    }
 
     if (!user) {
-      throw new BadRequestException('This email not found!');
+      throw new BadRequestException('User not found!');
     }
 
     return user;
