@@ -26,6 +26,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { LoginDto } from './dto/login.dto';
 
 @ApiTags('users')
 @ApiBearerAuth('access-token')
@@ -85,6 +86,13 @@ export class UserController {
   @Post('login')
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({ summary: 'Log in by email and password' })
+  @ApiCreatedResponse({
+    type: LoginDto,
+    description: 'Returns `LoginDto`',
+  })
+  @ApiBadRequestResponse({
+    description: 'Validation errors',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Log in successfully',
